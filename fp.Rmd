@@ -73,5 +73,3 @@ We expect coding challenges with cleaning string variables for the twitter datas
 |December 4        | Submit Report, Webpage, Screencast      |
 |December 5        | Submit Peer Assessment                  |
 |December 10       | In class discussion/presentations!      |
-
-
