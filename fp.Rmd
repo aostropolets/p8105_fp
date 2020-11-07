@@ -51,7 +51,7 @@ We could give some focus to the US election abroad; the world is anxiously await
 
 In this project, we will:
 
-* Comparing tweets of #Biden/#Trump by county/state and US polls to see if tweets are more accurate of predicting presidential results. We will make a choropleth map to visualize states that tweeted #Biden and #Trump and compare it to the 2020 election outcome. We will do the same with the polls. 
+* Compare tweets of #Biden/#Trump by county/state and US polls to see if tweets are more accurate of predicting presidential results. We will make a choropleth map to visualize states that tweeted #Biden and #Trump and compare it to the 2020 election outcome. We will do the same with the polls. 
 
 * Explore possible correlations between county wide factors (such as median income level) and organ donor registration rate. If the data is sufficient, we will explore using a mixed-effects regression model to test if specific county level variables influence changes in registration prevalence.
 
@@ -59,9 +59,10 @@ In this project, we will:
 1) Distribution of #Biden/#Trump by state; 
 2) US polls prediction of winning candidate by state  
 3) Graph of Current Votes by state for US Election Results 
+4) Emoji/ Emoticon prevalence by candidate ??
 
-* Regression Analysis --> Bivariate relationship between Vote Share and Tweet Share?? 
-* Interactive Map     --> ??
+* Regression Analysis --> Bivariate relationship between Vote Share and Tweet Share?? (I like this idea)
+* Interactive Dashboard     --> We can make a larger US map with an user interface to group results by state/county, tweet content, and other potential covariates. We can also add a world map with similar visualization by diferent countries. We can further allow for more granular slicing of results (GDP cutpoints for example). Finally, we could add an interactive word cloud where you can filter by Trump or Biden, other content, or variates.
 
 We expect coding challenges with cleaning string variables for the twitter dataset and a choropleth map.
 
