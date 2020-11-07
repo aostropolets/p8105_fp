@@ -1,0 +1,98 @@
+P8105 - Final Project Proposal
+================
+
+| Name             | Uni     |
+| ---------------- | ------- |
+| Chia-Wen Kao     | jck2183 |
+| Anna Ostropolets | ao2671  |
+| JR Chansakul     | ac4635  |
+| Thiago de Araujo | tbd2117 |
+
+#### Title: Predictors of US Elections - Twitter or The Polls?
+
+### Data sources:
+
+[US Election
+Twitter](https://www.kaggle.com/manchunhui/us-election-2020-tweets?select=hashtag_joebiden.csv)
+
+[2020 Election
+Forecast](https://github.com/fivethirtyeight/data/tree/master/election-forecasts-2020)
+
+Our data for current election results is downloaded from
+<https://www.kaggle.com/unanimad/us-election-2020>.
+
+### Motivation for this project
+
+[US PresidentialElection Polls
+Failure](https://news.northeastern.edu/2020/11/04/the-polls-were-still-way-off-in-the-2020-election-even-after-accounting-for-2016s-errors/);
+US polls have been the center of attention in recent presidential
+elections due to the fact that the results have not accurately reflected
+predictions. While pollsters suggest that the evidence of the 2016 and
+2020 elections will improve polling models, we suggest a shift to
+evaluate political behavior through social media activity such as
+Twitter. We believe that identifying geocoding tweets referencing
+presidential candidates will allow us to identify whether the political
+affiliation to that region.
+
+[Twitter as Indicator for Political
+Behavior](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0079449);
+The evolution of social media has been tied to political behavior such
+as voting. Since the public is quickly losing the trust of polls for
+political elections, researchers are now exploring whether social media
+activity can be utilized to assess offline political behavior. We
+believe that extracting online social networking environments can shed
+light on communication patterns and political preferences of
+individuals.
+
+### Intended final product
+
+  - A final report
+  - A webpage containing descriptive statistics, plots/visualizations,
+    interactive map comparing twitter hashtag frequency of 2020 US
+    presidential candidates by county/state and US polls
+  - Conclusions of twitter vs polls compared to election results
+  - A screencast explaining the webpage and analysis
+
+### The planned analyses / visualizations / coding challenges
+
+In this project, we will:
+
+  - Comparing tweets of \#Biden/\#Trump by county/state and US polls to
+    see if tweets are more accurate of predicting presidential results.
+    We will make a choropleth map to visualize states that tweeted
+    \#Biden and \#Trump and compare it to the 2020 election outcome. We
+    will do the same with the polls.
+
+  - Explore possible correlations between county wide factors (such as
+    median income level) and organ donor registration rate. If the data
+    is sufficient, we will explore using a mixed-effects regression
+    model to test if specific county level variables influence changes
+    in registration prevalence.
+
+\*Plot/Charts: 1) Distribution of \#Biden/\#Trump by state; 2) US polls
+prediction of winning candidate by state  
+3\) Graph of Current Votes by state for US Election Results
+
+  - Regression Analysis –\> Bivariate relationship between Vote Share
+    and Tweet Share??
+  - Interactive Map –\> ??
+
+We expect coding challenges with cleaning string variables for the
+twitter dataset and a choropleth map.
+
+### Timeline
+
+| Tentative Dates | Tasks                                |
+| --------------- | ------------------------------------ |
+| November 7      | Form Team and submit proposal        |
+| November 8-12   | TAs to confirm project and datasets  |
+| November 10-13  | Project review meeting: Zoom meeting |
+| November 13-15  | Data Cleaning                        |
+| November 16-19  | Exploratory Analysis, Plots          |
+| November 19\*\* | Check-in Meeting                     |
+| November 20-27  | Visualization, Interactive Map       |
+| November 27-30  | Finalize Webpage/Begin Report        |
+| December 1-4    | Work on Report and Record Screencast |
+| December 4      | Submit Report, Webpage, Screencast   |
+| December 5      | Submit Peer Assessment               |
+| December 10     | In class discussion/presentations\!  |
