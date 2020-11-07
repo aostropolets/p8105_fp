@@ -13,13 +13,21 @@ P8105 - Final Project Proposal
 ### Data sources:
 
 [US Election
-Twitter](https://www.kaggle.com/manchunhui/us-election-2020-tweets?select=hashtag_joebiden.csv)
+Twitter](https://www.kaggle.com/manchunhui/us-election-2020-tweets)
 
 [2020 Election
 Forecast](https://github.com/fivethirtyeight/data/tree/master/election-forecasts-2020)
 
 Our data for current election results is downloaded from
 <https://www.kaggle.com/unanimad/us-election-2020>.
+
+-----
+
+[UN - World Happines
+Report](https://www.kaggle.com/unsdsn/world-happiness?select=2019.csv)
+Interesting dataset with country-specific score by the UN on generosity,
+freedom, GDP, etc… could do some correlations with how other countries
+are tweeting about the US election. \*\*\*
 
 ### Motivation for this project
 
@@ -43,6 +51,13 @@ activity can be utilized to assess offline political behavior. We
 believe that extracting online social networking environments can shed
 light on communication patterns and political preferences of
 individuals.
+
+-----
+
+[World Holds Its Breath While the U.S. Chooses Its
+Leader](https://www.nytimes.com/2020/10/31/world/middleeast/world-us-election-response.html)
+We could give some focus to the US election abroad; the world is
+anxiously awaiting for the results (and tweeting about it\!). \*\*\*
 
 ### Intended final product
 
