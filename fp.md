@@ -8,7 +8,9 @@ P8105 - Final Project Proposal
 | JR Chansakul     | ac4635  |
 | Thiago de Araujo | tbd2117 |
 
-#### Title: Predictors of US Elections - Twitter or The Polls?
+### Title:
+
+#### Predictors of 2020 US Elections - Twitter or The Polls?
 
 ### Data sources:
 
@@ -24,7 +26,7 @@ Our data for current election results is downloaded from
 -----
 
 [UN - World Happines
-Report](https://www.kaggle.com/unsdsn/world-happiness?select=2019.csv)
+Report](https://www.kaggle.com/unsdsn/world-happiness?select=2019.csv)  
 Interesting dataset with country-specific score by the UN on generosity,
 freedom, GDP, etc… could do some correlations with how other countries
 are tweeting about the US election. \*\*\*
@@ -32,7 +34,7 @@ are tweeting about the US election. \*\*\*
 ### Motivation for this project
 
 [US PresidentialElection Polls
-Failure](https://news.northeastern.edu/2020/11/04/the-polls-were-still-way-off-in-the-2020-election-even-after-accounting-for-2016s-errors/);
+Failure](https://news.northeastern.edu/2020/11/04/the-polls-were-still-way-off-in-the-2020-election-even-after-accounting-for-2016s-errors/)  
 US polls have been the center of attention in recent presidential
 elections due to the fact that the results have not accurately reflected
 predictions. While pollsters suggest that the evidence of the 2016 and
@@ -43,7 +45,7 @@ presidential candidates will allow us to identify whether the political
 affiliation to that region.
 
 [Twitter as Indicator for Political
-Behavior](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0079449);
+Behavior](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0079449)  
 The evolution of social media has been tied to political behavior such
 as voting. Since the public is quickly losing the trust of polls for
 political elections, researchers are now exploring whether social media
@@ -55,7 +57,7 @@ individuals.
 -----
 
 [World Holds Its Breath While the U.S. Chooses Its
-Leader](https://www.nytimes.com/2020/10/31/world/middleeast/world-us-election-response.html)
+Leader](https://www.nytimes.com/2020/10/31/world/middleeast/world-us-election-response.html)  
 We could give some focus to the US election abroad; the world is
 anxiously awaiting for the results (and tweeting about it\!). \*\*\*
 
@@ -72,7 +74,7 @@ anxiously awaiting for the results (and tweeting about it\!). \*\*\*
 
 In this project, we will:
 
-  - Comparing tweets of \#Biden/\#Trump by county/state and US polls to
+  - Compare tweets of \#Biden/\#Trump by county/state and US polls to
     see if tweets are more accurate of predicting presidential results.
     We will make a choropleth map to visualize states that tweeted
     \#Biden and \#Trump and compare it to the 2020 election outcome. We
@@ -84,13 +86,25 @@ In this project, we will:
     model to test if specific county level variables influence changes
     in registration prevalence.
 
-\*Plot/Charts: 1) Distribution of \#Biden/\#Trump by state; 2) US polls
-prediction of winning candidate by state  
-3\) Graph of Current Votes by state for US Election Results
+#### Plot/Charts:
+
+1)  Distribution of \#Biden/\#Trump by state;  
+2)  US polls prediction of winning candidate by state  
+3)  Graph of Current Votes by state for US Election Results  
+4)  Emoji/ Emoticon prevalence by tweet category
+
+<!-- end list -->
 
   - Regression Analysis –\> Bivariate relationship between Vote Share
-    and Tweet Share??
-  - Interactive Map –\> ??
+    and Tweet Share?? (I like this idea)
+
+  - Interactive Dashboard –\> We can make a larger US map with an user
+    interface to group results by state/county, tweet content, and other
+    potential covariates. We can also add a world map with similar
+    visualization by diferent countries. We can further allow for more
+    granular slicing of results (GDP cutpoints for example). Finally, we
+    could add an interactive word cloud where you can filter by Trump or
+    Biden, other content, or variates.
 
 We expect coding challenges with cleaning string variables for the
 twitter dataset and a choropleth map.
