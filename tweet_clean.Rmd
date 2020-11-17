@@ -35,7 +35,12 @@ Importing datasets and making dates "tidy-er"
 
 ```{r}
 trump_df = 
-  read_csv("./datasets/trump1.csv") %>% select(!X1) %>% 
+  merge(
+    read_csv("./datasets/trump1.csv"),
+    read_csv("./datasets/trump2.csv"),
+    all = TRUE
+  ) %>%
+  select(!X1) %>% 
   separate(created_at, into = c("creation_date", "creation_time"), sep = " ") %>% 
   separate(creation_date, into = c("creation_year", "creation_month", "creation_day"), sep = "-") %>% 
   separate(user_join_date, into = c("join_date", "join_time"), sep = " ") %>% 
@@ -43,7 +48,12 @@ trump_df =
   mutate(hashtag = "Trump")
 
 biden_df = 
-  read_csv("./datasets/biden.csv") %>% select(!X1) %>% 
+  merge(
+    read_csv("./datasets/biden1.csv"),
+    read_csv("./datasets/biden2.csv"),
+    all = TRUE
+  ) %>%
+  select(!X1) %>%  
   separate(created_at, into = c("creation_date", "creation_time"), sep = " ") %>% 
   separate(creation_date, into = c("creation_year", "creation_month", "creation_day"), sep = "-") %>% 
   separate(user_join_date, into = c("join_date", "join_time"), sep = " ") %>% 
@@ -55,5 +65,68 @@ Joining dfs
 
 ```{r}
 tweets = 
-  merge(biden_df, trump_df, all = TRUE)
+  merge(biden_df, trump_df, all = TRUE) %>% 
+  slice_sample(n = 10000) #Taking too long for the full dataset
 ```
+
+Creating cleaned text version of tweets
+
+```{r}
+text = 
+tweets %>% 
+  select(tweet) %>% 
+  mutate(
+    tweet = gsub("#[[:alpha:]]*", "", tweet),
+    tweet = gsub("@[[:alpha:]]*", "", tweet),
+    tweet = gsub("https\\S*", "", tweet),
+    tweet = gsub("http\\S*", "", tweet),
+    tweet = gsub("@\\S*", "", tweet),
+    tweet = gsub("amp", "", tweet),
+    tweet = gsub("[\r\n]", "", tweet),
+    tweet = gsub("[0-9]", "", tweet),
+    tweet = gsub("[[:punct:]]", "", tweet)
+  )
+```
+
+Useful stuff:
+
+tidytext::unnest_tokens() -> unique words
+
+https://www.earthdatascience.org/courses/earth-analytics/get-data-using-apis/text-mining-twitter-data-intro-r/
+
+## WordCloud
+
+Also generating a _unique_word_count_ dataframe
+
+```{r}
+library(tm)
+library(wordcloud) #option1
+library(wordcloud2) #option2
+
+# Create a corpus  
+docs =
+  Corpus(VectorSource(text)) %>% 
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+  
+docs = tm_map(docs, content_transformer(tolower))
+docs = tm_map(docs, removeWords, stopwords("english"))
+
+words = 
+  TermDocumentMatrix(docs) %>% 
+  as.matrix() %>% 
+  rowSums() %>% 
+  sort(decreasing = TRUE)
+
+unique_word_count = data.frame(word = names(words),freq = words)
+
+#Option1
+wordcloud(words = unique_word_count$word, freq = unique_word_count$freq, min.freq = 2,           
+          max.words = 200, random.order = FALSE, rot.per = 0.45,            
+          colors = brewer.pal(8, "Dark2"))
+
+#Option2
+wordcloud2(data = unique_word_count, size = 1.5, color = 'random-dark', ellipticity = 1)
+```
+
