@@ -1,5 +1,5 @@
 ---
-title: "Tweet cleaning"
+title: "Creating Main Tweet (USA) dataframe"
 output: github_document
 ---
 
@@ -33,7 +33,7 @@ read_csv("./datasets/hashtag_joebiden.csv") %>%
 
 Importing datasets and making dates "tidy-er"
 
-```{r}
+```{r, eval = TRUE}
 trump_df = 
   merge(
     read_csv("./datasets/trump1.csv"),
@@ -61,9 +61,56 @@ biden_df =
   mutate(hashtag = "Biden")
 ```
 
-Joining dfs
+Joining dfs and subsetting for US
 
 ```{r}
 tweets = 
   merge(biden_df, trump_df, all = TRUE)
+
+# Subset with USA tweets only
+tweets_usa =
+  tweets %>% 
+  filter(country == "United States of America")
 ```
+
+Election stuff
+
+```{r}
+election_df =
+  read_csv("./datasets/president_county_candidate.csv") %>% 
+  group_by(state, party) %>% 
+  mutate(party_total = sum(total_votes)) %>% 
+  ungroup() %>% 
+  group_by(state) %>%
+  mutate(state_winner = case_when(
+                      party_total == max(party_total) ~ TRUE,
+                      party_total != max(party_total) ~ FALSE),
+         state_total = sum(total_votes)
+  )
+
+state_election_df = 
+  election_df %>% 
+  filter(state_winner == TRUE) %>% 
+  select(state, candidate, party, party_total, state_total) %>% 
+  distinct()
+```
+
+joining df
+
+```{r}
+main_tweets_usa = 
+  left_join(tweets_usa, state_election_df, by = "state") %>% 
+  rename(
+    winner_candidate = candidate,
+    winner_party = party
+  )
+```
+
+[1] 16628 tweets contain #trump AND #biden:
+
+```{r}
+nrow(main_tweets_usa) - main_tweets_usa %>% 
+  distinct(tweet) %>% 
+  nrow()
+```
+

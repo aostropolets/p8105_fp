@@ -5,106 +5,105 @@ output: github_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(wordcloud) #option1
+library(wordcloud2) #option2
+library(RColorBrewer)
 ```
 
-Making datasets less than 100MB just wit `drop_na`
+The `wordcount_df` function need a `df` that contains a **tweet** column. 
 
-```{r, eval = FALSE}
-read_csv("./datasets/hashtag_donaldtrump.csv") %>% 
-  drop_na() %>%
-  slice(seq(0.5 * n())) %>% 
-  write.csv("./datasets/trump1.csv")
+It generates a new df with a _word_ and a _freq_ column.
 
-read_csv("./datasets/hashtag_donaldtrump.csv") %>% 
-  drop_na() %>%
-  slice(-seq(0.5 * n())) %>% 
-  write.csv("./datasets/trump2.csv")
+```{r}
+wordcount_df = function(df) {
   
-read_csv("./datasets/hashtag_joebiden.csv") %>% 
-  drop_na() %>% 
-  slice(seq(0.5 * n())) %>% 
-  write.csv("./datasets/biden1.csv")
+  library(tm)
 
-read_csv("./datasets/hashtag_joebiden.csv") %>% 
-  drop_na() %>% 
-  slice(-seq(0.5 * n())) %>% 
-  write.csv("./datasets/biden2.csv")
+  if (!is.data.frame(df)) {
+    stop("Input must be a dataframe")
+  }
+  
+  df_text = 
+    df %>% 
+    select(tweet) %>%
+    mutate(
+       tweet = gsub("#[[:alpha:]]*", "", tweet),
+       tweet = gsub("@[[:alpha:]]*", "", tweet),
+       tweet = gsub("https\\S*", "", tweet),
+       tweet = gsub("http\\S*", "", tweet),
+       tweet = gsub("@\\S*", "", tweet),
+       tweet = gsub("amp", "", tweet),
+       tweet = gsub("[\r\n]", "", tweet),
+       tweet = gsub("[0-9]", "", tweet),
+       tweet = gsub("[[:punct:]]", "", tweet)
+    ) %>% 
+    slice_head(n = 10000)
+  
+  docs_df =
+    Corpus(VectorSource(df_text)) %>% 
+    tm_map(removeNumbers) %>%
+    tm_map(removePunctuation) %>%
+    tm_map(stripWhitespace) %>% 
+    tm_map(content_transformer(tolower)) %>% 
+    tm_map(removeWords, stopwords("english"))
+  
+  words_df = 
+    TermDocumentMatrix(docs_df) %>% 
+    as.matrix() %>% 
+    rowSums() %>% 
+    sort(decreasing = TRUE)
+  
+  word_count_df = data.frame(word = names(words_df),freq = words_df)
+
+  return(word_count_df)
+  
+}
 ```
 
-Importing datasets and making dates "tidy-er"
-
-```{r}
-trump_df = 
-  merge(
-    read_csv("./datasets/trump1.csv"),
-    read_csv("./datasets/trump2.csv"),
-    all = TRUE
-  ) %>%
-  select(!X1) %>% 
-  separate(created_at, into = c("creation_date", "creation_time"), sep = " ") %>% 
-  separate(creation_date, into = c("creation_year", "creation_month", "creation_day"), sep = "-") %>% 
-  separate(user_join_date, into = c("join_date", "join_time"), sep = " ") %>% 
-  separate(join_date, into = c("join_year", "join_month", "join_day"), sep = "-") %>% 
-  mutate(hashtag = "Trump")
-
-biden_df = 
-  merge(
-    read_csv("./datasets/biden1.csv"),
-    read_csv("./datasets/biden2.csv"),
-    all = TRUE
-  ) %>%
-  select(!X1) %>%  
-  separate(created_at, into = c("creation_date", "creation_time"), sep = " ") %>% 
-  separate(creation_date, into = c("creation_year", "creation_month", "creation_day"), sep = "-") %>% 
-  separate(user_join_date, into = c("join_date", "join_time"), sep = " ") %>% 
-  separate(join_date, into = c("join_year", "join_month", "join_day"), sep = "-") %>% 
-  mutate(hashtag = "Biden")
-```
-
-Joining dfs
-
-```{r}
-tweets = 
-  merge(biden_df, trump_df, all = TRUE)
-```
-
-Creating cleaned text version of tweets
+Creating word and freq dfs to create **wordclouds** later
 
 ```{r}
 biden_text = 
-  biden_df %>% 
-  select(tweet) %>%
-  mutate(
-    tweet = gsub("#[[:alpha:]]*", "", tweet),
-    tweet = gsub("@[[:alpha:]]*", "", tweet),
-    tweet = gsub("https\\S*", "", tweet),
-    tweet = gsub("http\\S*", "", tweet),
-    tweet = gsub("@\\S*", "", tweet),
-    tweet = gsub("amp", "", tweet),
-    tweet = gsub("[\r\n]", "", tweet),
-    tweet = gsub("[0-9]", "", tweet),
-    tweet = gsub("[[:punct:]]", "", tweet)
-  ) %>% 
-  slice_head(n = 10000)
+  main_tweets_usa %>% 
+  filter(hashtag == "Biden") %>% 
+  wordcount_df()
+
+trump_text =
+  main_tweets_usa %>% 
+  filter(hashtag == "Trump") %>% 
+  wordcount_df()
 ```
 
+## WordClouds
+[http://www.clc-ent.com/TBDE/Docs/wordCloud.pdf]
+[https://towardsdatascience.com/create-a-word-cloud-with-r-bde3e7422e8a]
+[http://www.sthda.com/english/wiki/word-cloud-generator-in-r-one-killer-function-to-do-everything-you-need]
+
+
 ```{r}
-trump_text = 
-  trump_df %>% 
-  select(tweet) %>% 
-  mutate(
-    tweet = gsub("#[[:alpha:]]*", "", tweet),
-    tweet = gsub("@[[:alpha:]]*", "", tweet),
-    tweet = gsub("https\\S*", "", tweet),
-    tweet = gsub("http\\S*", "", tweet),
-    tweet = gsub("@\\S*", "", tweet),
-    tweet = gsub("amp", "", tweet),
-    tweet = gsub("[\r\n]", "", tweet),
-    tweet = gsub("[0-9]", "", tweet),
-    tweet = gsub("[[:punct:]]", "", tweet)
-  ) %>% 
-  slice_sample(n = 10000)
+#Option1
+wordcloud(words = biden_text$word, freq = biden_text$freq, min.freq = 2,           
+          max.words = 250, random.order = FALSE, rot.per = 0.45,            
+          colors = brewer.pal(8, "Dark2"), scale = c(3.5,0.25))
+
+wordcloud(words = trump_text$word, freq = trump_text$freq, min.freq = 2,           
+          max.words = 250, random.order = FALSE, rot.per = 0.45,            
+          colors = brewer.pal(8, "RdBu"), scale = c(3.5,0.25))
+
+#Option2
+wordcloud2(data = biden_text, size = 1.5, color = 'random-dark', ellipticity = 1)
+
+wordcloud2(data = trump_text, size = 1.5, color = 'random-dark', ellipticity = 1)
 ```
+
+Changing shape
+
+```{r}
+#USA shape
+wordcloud2(biden_text, size = 1.2, figPath = "usa.jpg", ellipticity = 8, minSize = 6)
+wordcloud2(trump_text, size = 1.2, figPath = "usa.jpg", ellipticity = 8, minSize = 6)
+```
+
 
 Useful stuff:
 
@@ -117,86 +116,7 @@ https://www.earthdatascience.org/courses/earth-analytics/get-data-using-apis/tex
 [https://towardsdatascience.com/create-a-word-cloud-with-r-bde3e7422e8a]
 [http://www.sthda.com/english/wiki/word-cloud-generator-in-r-one-killer-function-to-do-everything-you-need]
 
-Also generating a _unique_word_count_ dataframe
-
-```{r}
-library(tm)
-
-# Create a corpus  
-docs1 =
-  Corpus(VectorSource(biden_text)) %>% 
-  tm_map(removeNumbers) %>%
-  tm_map(removePunctuation) %>%
-  tm_map(stripWhitespace) %>% 
-  tm_map(content_transformer(tolower)) %>% 
-  tm_map(removeWords, stopwords("english"))
-
-docs2 =
-  Corpus(VectorSource(trump_text)) %>% 
-  tm_map(removeNumbers) %>%
-  tm_map(removePunctuation) %>%
-  tm_map(stripWhitespace) %>% 
-  tm_map(content_transformer(tolower)) %>% 
-  tm_map(removeWords, stopwords("english"))
-
-words1 = 
-  TermDocumentMatrix(docs1) %>% 
-  as.matrix() %>% 
-  rowSums() %>% 
-  sort(decreasing = TRUE)
-
-words2 = 
-  TermDocumentMatrix(docs2) %>% 
-  as.matrix() %>% 
-  rowSums() %>% 
-  sort(decreasing = TRUE)
-
-word_count_biden = data.frame(word = names(words1),freq = words1)
-word_count_trump = data.frame(word = names(words2),freq = words2)
-```
-
-
-```{r}
-library(wordcloud) #option1
-library(wordcloud2) #option2
-library(RColorBrewer)
-
-#Option1
-wordcloud(words = word_count_biden$word, freq = word_count_biden$freq, min.freq = 2,           
-          max.words = 250, random.order = FALSE, rot.per = 0.45,            
-          colors = brewer.pal(8, "Dark2"), scale = c(3.5,0.25))
-
-wordcloud(words = word_count_trump$word, freq = word_count_trump$freq, min.freq = 2,           
-          max.words = 250, random.order = FALSE, rot.per = 0.45,            
-          colors = brewer.pal(8, "RdBu"), scale = c(3.5,0.25))
-
-#Option2
-wordcloud2(data = word_count_biden, size = 1.5, color = 'random-dark', ellipticity = 1)
-
-wordcloud2(data = word_count_trump, size = 1.5, color = 'random-dark', ellipticity = 1)
-```
-
-Changing shape
-
-```{r}
-#install_github("lchiffon/wordcloud2")
-
-#USA shape
-wordcloud2(word_count_biden, size = 1.2, figPath = "usa.jpg", ellipticity = 8, minSize = 6)
-wordcloud2(word_count_trump, size = 1.2, figPath = "usa.jpg", ellipticity = 8, minSize = 6)
-
-# different colors?
-colorVec = rep(c('Red', 'skyblue'), length.out=nrow(word_count_biden))
-colorVec2 = rep(c('Blue', 'indianred'), length.out=nrow(word_count_trump))
-
-wordcloud2(word_count_biden, size = 1.2, figPath = "usa.jpg", ellipticity = 8, minSize = 6, 
-           color = colorVec)
-
-wordcloud2(word_count_trump, size = 1.2, figPath = "usa.jpg", ellipticity = 8, minSize = 6, 
-           color = colorVec2)
-```
-
-Exposrting as pdf or png... **do not work**
+## Exporting as pdf or png... **not working**
 [https://www.r-graph-gallery.com/196-the-wordcloud2-library.html#export]
 
 ```{r, eval = FALSE}
