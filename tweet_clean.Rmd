@@ -5,6 +5,7 @@ output: github_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(ggmap)
 ```
 
 Making datasets less than 100MB just wit `drop_na`
@@ -61,6 +62,9 @@ biden_df =
   mutate(hashtag = "Biden")
 ```
 
+Description of the dfs:
+date of tweet (y,m,d), tweet_id (may be issues with column format), tweet, # of likes, reshares, user, followers, location (city, country, state, lat-long)
+
 Joining dfs and subsetting for US
 
 ```{r}
@@ -113,4 +117,71 @@ nrow(main_tweets_usa) - main_tweets_usa %>%
   distinct(tweet) %>% 
   nrow()
 ```
+
+## Plots
+Characterizing tweets
+TODO : use the same colors
+
+```{r}
+tweets_usa %>%
+group_by(state, hashtag)%>%
+summarise(count = n()) %>%  
+ggplot() +
+geom_col(aes(x=state, y=count, color = hashtag ), position = "dodge") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs (title = "Distribution of tweets across US states")
+```
+
+for NYC map over boroughs + plot them over map (map is not showing up)
+```{r}
+
+tweets_usa %>% 
+ filter (state_code == 'NY' & city == 'New York') %>%
+  leaflet() %>% 
+  addTiles() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircleMarkers(~lat, ~long, radius = 2, color = ~hashtag)
+
+```
+
+TODO:time
+
+```{r}
+tweets_usa %>% 
+mutate(date = as.Date(paste(creation_month, creation_day, '2020', sep = "/"), format  = "%m/%d/%y")) %>%  
+group_by (date, hashtag) %>%
+summarise(count = n())  %>%
+ggplot(aes(x=date,y=count,color = hashtag)) +
+geom_smooth(method = "lm") +
+geom_point(aes(x=date, y=count, color = hashtag)) +
+geom_vline(xintercept = as.Date("2020-11-02")) +
+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+scale_x_date(date_breaks = '1 day') +
+labs (title = "Distribution of tweets over time", 
+        x = "Day",
+        y = "Number of tweets")
+```
+
+We see that there is an increase in tweets over time with Biden having less tweets overall (albeit not statistically significant)
+
+
+```{r}
+
+#tweets_usa %>%
+#select (user_followers_count) %>%
+#  arrange(desc(user_followers_count))
+
+tweets_usa %>%
+group_by(hashtag)%>%
+filter (retweet_count>0 & likes>0) %>%
+filter (user_followers_count<=3750110) %>%# filter outliers  
+mutate(user_followers_count = user_followers_count/1000) %>%
+ggplot() +
+geom_point(aes(x= user_followers_count , y= retweet_count, color = hashtag, size = likes  )) +
+  labs (title = "How tweets are shared and liked depending on the number of followers", 
+        x = "Numer of users, thousands",
+        y = "Number of retweets")
+```
+ 
+
 
