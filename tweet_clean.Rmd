@@ -75,7 +75,7 @@ tweets =
 
 # Subset with USA tweets only
 tweets_usa =
-  tweets %>% 
+  merge(biden_df, trump_df, all = TRUE) %>% 
   filter(country == "United States of America")
 ```
 
