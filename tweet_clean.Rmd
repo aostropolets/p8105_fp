@@ -6,6 +6,7 @@ output: github_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(ggmap)
+library(maps)
 ```
 
 Making datasets less than 100MB just wit `drop_na`
@@ -144,7 +145,6 @@ tweets_usa %>%
 
 ```
 
-TODO:time
 
 ```{r}
 tweets_usa %>% 
@@ -183,5 +183,38 @@ geom_point(aes(x= user_followers_count , y= retweet_count, color = hashtag, size
         y = "Number of retweets")
 ```
  
+
+
+
+```{r}
+
+usa_map <- map_data("state")
+
+tweet_map <- tweets_usa %>%
+group_by(state, hashtag) %>%
+summarise(count = n(),
+          likes = sum(likes)) %>%  
+mutate (likes_tweets = likes*count,
+        region = tolower(state)) %>%
+select (region, hashtag, likes_tweets)  %>%
+pivot_wider(names_from = "hashtag",
+            values_from = "likes_tweets")  %>%
+mutate(top = case_when(Biden>coalesce(Trump,0) ~ "Biden",
+                       Trump>Biden ~ "Trump"))
+
+
+states_tweet_map <- left_join(usa_map, tweet_map)
+
+
+p <- ggplot(data = states_tweet_map,
+            aes(x = long, y = lat,
+                group = group, fill = top))
+
+p + geom_polygon(color = "gray90", size = 0.1) +
+    labs(title ="Most popular tweets across states")
+  
+```
+
+
 
 
