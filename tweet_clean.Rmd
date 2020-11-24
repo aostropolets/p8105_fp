@@ -1,13 +1,21 @@
 ---
 title: "Creating Main Tweet (USA) dataframe"
 output: github_document
+always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(ggmap)
 library(maps)
+library(tigris)
+library(dplyr)
 library(leaflet)
+library(sp)
+library(ggmap)
+library(maptools)
+library(broom)
+library(httr)
+library(rgdal)
 ```
 
 Making datasets less than 100MB just wit `drop_na`
@@ -134,18 +142,6 @@ geom_col(aes(x=state, y=count, color = hashtag ), position = "dodge") +
   labs (title = "Distribution of tweets across US states")
 ```
 
-for NYC map over boroughs + plot them over map (map is not showing up)
-```{r}
-
-tweets_usa %>% 
- filter (state_code == 'NY' & city == 'New York') %>%
-  leaflet() %>% 
-  addTiles() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>% 
-  addCircleMarkers(~lat, ~long, radius = 2, color = ~hashtag)
-
-```
-
 
 ```{r}
 tweets_usa %>% 
@@ -207,11 +203,10 @@ mutate(top = case_when(Biden>coalesce(Trump,0) ~ "Biden",
 states_tweet_map <- left_join(usa_map, tweet_map)
 
 
-p <- ggplot(data = states_tweet_map,
+    ggplot(data = states_tweet_map,
             aes(x = long, y = lat,
-                group = group, fill = top))
-
-p + geom_polygon(color = "gray90", size = 0.1) +
+                group = group, fill = top)) +
+    geom_polygon(color = "gray90", size = 0.1) +
     labs(title ="Most popular tweets across states")
   
 ```
@@ -219,3 +214,29 @@ p + geom_polygon(color = "gray90", size = 0.1) +
 
 
 
+for NYC map over boroughs + plot them over map 
+```{r}
+    NY <-tweets_usa %>% 
+    filter (state_code == 'NY' & city == 'New York') %>%
+    filter (likes>10 & retweet_count>10) %>%
+    select (lat, long, hashtag, likes, retweet_count)
+
+r <- GET('http://data.beta.nyc//dataset/0ff93d2d-90ba-457c-9f7e-39e47bf2ac5f/resource/35dd04fb-81b3-479b-a074-a27a37888ce7/download/d085e2f8d0b54d4590b1e7d1f35594c1pediacitiesnycneighborhoods.geojson')
+nyc_neighborhoods <- readOGR(content(r,'text'), 'OGRGeoJSON', verbose = F)
+
+NY_points <- NY
+sp::coordinates(NY_points) <- ~long + lat
+proj4string(NY_points) <- proj4string(nyc_neighborhoods)
+matches <- over(NY_points, nyc_neighborhoods)
+points <- cbind(NY, matches)
+map_data <- geo_join(nyc_neighborhoods, points, "neighborhood", "neighborhood")
+
+
+leaflet(map_data) %>%
+  addTiles() %>% 
+  addPolygons(popup = ~hashtag) %>% 
+  addMarkers(~long, ~lat, popup = ~hashtag, data = points) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(-75, 40.75, zoom = 10)
+
+```
