@@ -13,7 +13,7 @@ theme_set(theme(legend.position = "right"))
 
 ## Import data
 
-```{r}
+```{r, message = FALSE}
 vote_df = read_csv("./datasets/president_county_candidate.csv")
 state_sum = read_csv("./datasets/president_state.csv")
 region_df = 
@@ -22,7 +22,7 @@ region_df =
 ```
 ## Merge Data and Tidy up the data
 
-```{r}
+```{r, message = FALSE}
 election_df =
     merge(
     read_csv("./datasets/president_county_candidate.csv"),
@@ -105,7 +105,7 @@ par( mfrow = c(2,2) )
 plot_1 + plot_2 + plot_3 + plot_4 + plot_layout(guides = "collect") 
 ```
 
-```{r}
+```{r, message = FALSE}
 main_plot =
 election_by_region %>% 
     select(-`State Code`) %>% 
@@ -117,8 +117,9 @@ election_by_region %>%
          y = "Vote Proportion") + 
     scale_fill_manual(values = colors)
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
-    
-   
+
+```
+```{r, eval= FALSE}
 ggplotly(main_plot)    
 ```
 
@@ -176,11 +177,12 @@ total_votes_p4 =
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) 
 
 par( mfrow = c(2,2) )
-total_votes_p1 + total_votes_p2 + total_votes_p3 + total_votes_p4 
-
+total_votes_p1 + total_votes_p2 + total_votes_p3 + total_votes_p4
 ```
+
 ## Clean Data Specifying Winner
-```{r}
+
+```{r, message = FALSE}
 election_winner_df =
    read_csv("./datasets/president_county_candidate.csv") %>% 
     group_by(state, party) %>% 
@@ -200,6 +202,7 @@ winner_region =
     distinct()
 ```
 ## Barplot for each states by 4 regions specifying winner 
+
 ```{r}
 colors <- c("red", "blue")
 names(colors) = c("Donald Trump", "Joe Biden")
@@ -258,7 +261,7 @@ Midwest_votes_p + West_votes_p + South_votes_p + Northeast_votes_p + plot_layout
 
 ## Tidy Data with Map information.
 
-```{r}
+```{r, message = FALSE}
 election_map_df =
     election_winner_df %>% 
     filter(state_winner == TRUE) %>% 
@@ -271,6 +274,7 @@ usa_map = map_data("state")
 usa_election_map = left_join(usa_map, election_map_df)
 ```
 ## Plot the map with the election result.
+
 ```{r}
 colors <- c("red", "blue")
 names(colors) = c("Donald Trump", "Joe Biden")
@@ -292,6 +296,8 @@ ggplot(data = usa_election_map,
         axis.ticks.y = element_blank(), 
         legend.position = "bottom") 
 election_result_map
+```
+```{r , eval = FALSE}
 ggplotly(election_result_map)
 ```
 
