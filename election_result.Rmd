@@ -1,7 +1,9 @@
 ---
-title: "US Eleciton Result"
-output: github_document
-always_allow_html: true
+title: "US election result"
+author: "jck2183"
+output: 
+  html_document:
+    keep_md: true
 ---
 
 ```{r setup, include=FALSE}
@@ -119,7 +121,8 @@ election_by_region %>%
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
 ```
-```{r, eval= FALSE}
+```{r}
+webshot::install_phantomjs()
 ggplotly(main_plot)    
 ```
 
@@ -297,7 +300,8 @@ ggplot(data = usa_election_map,
         legend.position = "bottom") 
 election_result_map
 ```
-```{r , eval = FALSE}
+```{r}
+webshot::install_phantomjs(force = TRUE)
 ggplotly(election_result_map)
 ```
 
