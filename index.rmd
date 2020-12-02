@@ -1,12 +1,184 @@
 ---
-title: ""
+title: "P8105 - Final Project"
 output: 
   html_document:
+    code_folding: hide
     toc: true
     toc_float: true
 ---
 
 
+# Links to datasets
+
+* [US Election Twitter ](https://www.kaggle.com/manchunhui/us-election-2020-tweets)
+
+* [2020 Election Forecast](https://github.com/fivethirtyeight/data/tree/master/election-forecasts-2020)
+
+* [2020 Election](https://www.kaggle.com/unanimad/us-election-2020)
 
 
+
+## Result Comparison {.tabset}
+
+### Results
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(plotly) 
+```
+
+```{r}
+vote_df = read_csv("./datasets/president_county_candidate.csv")
+state_sum = read_csv("./datasets/president_state.csv")
+region_df = 
+    read_csv("./datasets/states.csv") %>% 
+    rename(state = State)  
+```
+
+
+```{r}
+election_winner_df =
+   read_csv("./datasets/president_county_candidate.csv") %>% 
+    group_by(state, party) %>% 
+    mutate(party_total = sum(total_votes)) %>% 
+    ungroup() %>% 
+    group_by(state) %>%
+    mutate(state_winner = case_when(
+        party_total == max(party_total) ~ TRUE,
+        party_total != max(party_total) ~ FALSE),
+        state_total = sum(total_votes)
+    )
+
+winner_region =
+    left_join(election_winner_df, region_df) %>% 
+    filter(state_winner == TRUE) %>% 
+    select(state, candidate, state_total, Region) %>% 
+    distinct()
+```
+
+
+```{r}
+election_map_df =
+    election_winner_df %>% 
+    filter(state_winner == TRUE) %>% 
+    mutate(region = tolower(state)) %>% 
+    select(state, candidate, party_total, state_total, region) %>% 
+    distinct()
+
+usa_map = map_data("state") 
+
+usa_election_map = left_join(usa_map, election_map_df)
+```
+
+
+```{r}
+colors <- c("red", "blue")
+names(colors) = c("Donald Trump", "Joe Biden")
+
+election_result_map =
+ggplot(data = usa_election_map,
+       aes(x = long, y = lat,
+           group = group, fill = candidate, 
+           text = paste("State: ", state , 
+                 "</br></br>Candidate: ", candidate, 
+                 "</br>Votes: ", party_total, 
+                 "</br>Winning Proportion: ", round(party_total/state_total, 2)))) +
+    geom_polygon(color = "gray90", size = 0.1) +
+    labs(title = "Election Results across states") + 
+    scale_fill_manual(values = colors) +
+    theme_void() +
+    theme(
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(), 
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        legend.position = "bottom") 
+
+ggplotly(election_result_map, tooltip = "text")
+```
+
+
+### Election Results with Tweets
+
+
+```{r}
+trump_df = 
+  merge(
+    read_csv("./datasets/trump1.csv"),
+    read_csv("./datasets/trump2.csv"),
+    all = TRUE
+  ) %>%
+  select(!X1) %>% 
+  separate(created_at, into = c("creation_date", "creation_time"), sep = " ") %>% 
+  separate(creation_date, into = c("creation_year", "creation_month", "creation_day"), sep = "-") %>% 
+  separate(user_join_date, into = c("join_date", "join_time"), sep = " ") %>% 
+  separate(join_date, into = c("join_year", "join_month", "join_day"), sep = "-") %>% 
+  mutate(hashtag = "Trump")
+
+biden_df = 
+  merge(
+    read_csv("./datasets/biden1.csv"),
+    read_csv("./datasets/biden2.csv"),
+    all = TRUE
+  ) %>%
+  select(!X1) %>%  
+  separate(created_at, into = c("creation_date", "creation_time"), sep = " ") %>% 
+  separate(creation_date, into = c("creation_year", "creation_month", "creation_day"), sep = "-") %>% 
+  separate(user_join_date, into = c("join_date", "join_time"), sep = " ") %>% 
+  separate(join_date, into = c("join_year", "join_month", "join_day"), sep = "-") %>% 
+  mutate(hashtag = "Biden")
+```
+
+```{r}
+tweets_usa =
+  merge(biden_df, trump_df, all = TRUE) %>% 
+  filter(country == "United States of America")
+```
+
+
+```{r}
+usa_map <- map_data("state")
+
+tweet_map <- tweets_usa %>%
+group_by(state, hashtag) %>%
+summarise(count = n(),
+          likes = sum(likes)) %>%  
+mutate (likes_tweets = likes*count,
+        region = tolower(state)) %>%
+select (region, hashtag, likes_tweets)  %>%
+pivot_wider(names_from = "hashtag",
+            values_from = "likes_tweets")  %>%
+mutate(top = case_when(Biden>coalesce(Trump,0) ~ "Biden",
+                       Trump>Biden ~ "Trump"))
+
+
+states_tweet_map <- left_join(usa_map, tweet_map)
+
+colors <- c("red", "blue")
+names(colors) = c("Trump", "Biden")
+
+tweet_result_map = 
+  ggplot(data = states_tweet_map,
+            aes(x = long, y = lat,
+                group = group, fill = top, 
+                text = paste("State: ", state , 
+                 "</br></br>Candidate: ", top ))) +
+    geom_polygon(color = "gray90", size = 0.1) +
+    labs(title = "Tweets Results across states") + 
+    scale_fill_manual(values = colors) +
+    theme_void() +
+    theme(
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(), 
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(), 
+        legend.position = "bottom") 
+    
+
+ggplotly(tweet_result_map, tooltip = "text")    
+```
 
