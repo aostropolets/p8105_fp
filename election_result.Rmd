@@ -104,7 +104,16 @@ plot_1 + plot_2 + plot_3 + plot_4 + plot_layout(guides = "collect")
 ```{r, message = FALSE}
 main_plot =
 election_by_region %>% 
-    ggplot(aes(x = Region, y = prop_votes, fill = candidate )) +
+  group_by(Region, candidate) %>% 
+  mutate(
+    region_votes = sum(state_votes),
+    region_total = sum(state_subtotal), 
+    region_prop = round(region_votes/region_total, 2)
+  ) %>% 
+    ggplot(aes(x = Region, y = region_prop, fill = candidate, 
+               text = paste("Region: ", Region , 
+                 "</br></br>Proportion ", region_prop, 
+                 "</br>Candidate: ", candidate))) +
     geom_bar(stat = "identity", position = position_dodge()) + 
     labs(title = "Proportion of Votes in Four Main Regions", 
          x = "Region", 
@@ -114,8 +123,7 @@ election_by_region %>%
 
 ```
 ```{r}
-webshot::install_phantomjs()
-ggplotly(main_plot)    
+ggplotly(main_plot, tooltip = "text")
 ```
 
 ## Bar Plot of total votes in Each State segamented by Region
@@ -273,9 +281,11 @@ names(colors) = c("Donald Trump", "Joe Biden")
 election_result_map =
 ggplot(data = usa_election_map,
        aes(x = long, y = lat,
-           group = group, fill = factor(candidate), 
-           text = paste("State: ", state, 
-                 "</br>Candidate: ", candidate, 1))) +
+           group = group, fill = candidate, 
+           text = paste("State: ", state , 
+                 "</br></br>Candidate: ", candidate, 
+                 "</br>Votes: ", party_total, 
+                 "</br>Winning Proportion: ", round(party_total/state_total, 2)))) +
     geom_polygon(color = "gray90", size = 0.1) +
     labs(title = "Election Results across states") + 
     scale_fill_manual(values = colors) +
@@ -291,7 +301,7 @@ ggplot(data = usa_election_map,
 election_result_map
 ```
 ```{r}
-webshot::install_phantomjs(force = TRUE)
+
 ggplotly(election_result_map, tooltip = "text")
 ```
 
